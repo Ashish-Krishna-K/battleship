@@ -1,5 +1,5 @@
 import { computerPlayer } from './computer-player';
-import { Ship, Gameboard, setCoordinate } from './index';
+import { Ship, Gameboard, setCoordinate } from './classes';
 
 test('must return correct object', () => {
   expect(setCoordinate(2, 3)).toStrictEqual({ x: 2, y: 3 });

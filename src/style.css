@@ -1,0 +1,47 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+#boards {
+    display: flex;
+    gap: 100px;
+}
+
+#player-board {
+    width: 400px;
+    height: 400px;
+
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+}
+
+#computer-board {
+    width: 400px;
+    height: 400px;
+
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+}
+
+.cell {
+    height: 50px;
+    border: 1px solid black;
+}
+
+#computer-board .cell:hover {
+    background-color: aquamarine;
+}
+
+.ship {
+    background-color: gray;
+}
+
+.mark {
+    background-color: red;
+}

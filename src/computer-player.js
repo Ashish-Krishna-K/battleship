@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax */
-import { generateRandomCoordinates } from './index';
+import { generateRandomCoordinates } from './classes';
 
 const computerPlayer = (playerBoard) => {
   const compPlay = generateRandomCoordinates();
