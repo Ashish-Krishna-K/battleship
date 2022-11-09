@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 import { generateRandomCoordinates } from './classes';
+import { markPlay } from './dom-manipulation';
 
 const computerPlayer = (playerBoard) => {
   const compPlay = generateRandomCoordinates();
@@ -20,11 +21,14 @@ const computerPlayer = (playerBoard) => {
   const legalMove = checkLegal(playerBoard.plays, compPlay);
 
   if (!legalMove) {
+    console.log('illegal', compPlay);
     computerPlayer(playerBoard);
+    return;
   }
-  playerBoard.receiveAttack(compPlay);
 
-  return { checkLegal };
+  console.log(compPlay);
+  playerBoard.receiveAttack(compPlay);
+  markPlay(compPlay, 'computer');
 };
 
 export {

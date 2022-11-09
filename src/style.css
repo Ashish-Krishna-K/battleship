@@ -29,6 +29,13 @@ html, body {
     grid-template-columns: repeat(10, 1fr);
 }
 
+#place-ships {
+    width: 400px;
+
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+}
+
 .cell {
     height: 50px;
     border: 1px solid black;
@@ -38,10 +45,19 @@ html, body {
     background-color: aquamarine;
 }
 
+
+#place-ships .cell:hover {
+    background-color: aquamarine;
+}
+
 .ship {
     background-color: gray;
 }
 
 .mark {
     background-color: red;
+}
+
+.hidden {
+    visibility: hidden;
 }

@@ -8,9 +8,24 @@
     <script src="main.js" defer></script>
 </head>
 <body>
+    <div id="winners">
+        <h1 id="game-winner"></h1>
+        <div id="round-winner"></div>
+    </div>
+    <div id="initial">
+        <div>Place your ships</div>
+        <div id="ship-name"></div>
+        <!-- <div id="place-ships"></div> -->
+        <select id="orientation">
+            <div>Orientation</div>
+            <option value="horizontal">Horizontal</option>
+            <option value="vertical">vertical</option>
+        </select>
+        <button id="start">Start game</button>    
+    </div>
     <div id="boards">
         <div id="player-board"></div>
-        <div id="computer-board"></div>
+        <div id="computer-board" class="hidden"></div>
     </div>
 </body>
 </html>

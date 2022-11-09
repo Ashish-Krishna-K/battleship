@@ -21,6 +21,27 @@ const Ship = (length, orientation) => {
   };
 };
 
+function setCoordinate(a, b) {
+  return {
+    x: a,
+    y: b,
+  };
+}
+
+function generateRandomCoordinates() {
+  const a = Math.floor(Math.random() * 10);
+  const b = Math.floor(Math.random() * 10);
+  return setCoordinate(a, b);
+}
+
+function compareCoods(cod1, cod2) {
+  const obj1 = JSON.stringify(cod1);
+  const obj2 = JSON.stringify(cod2);
+  console.log(obj1, obj2);
+  console.log(obj1 === obj2);
+  return obj1 === obj2;
+}
+
 const Gameboard = () => {
   const ships = {
     carrier: { name: null, coordinates: [], sunkStatus: false },
@@ -33,71 +54,104 @@ const Gameboard = () => {
   const plays = [];
   const shipsPlaced = [];
 
-  const placeShip = (len, orientation, coordinate, max, vessel) => {
+  const placeShip = (len, orientation, coordinate, max) => {
+    const tempArr = [];
+
     if (orientation === 'horizontal') {
       if (coordinate.x < max) {
         for (let i = 0; i <= len - 1; i++) {
-          // eslint-disable-next-line no-param-reassign
-          vessel[i] = { x: coordinate.x + i, y: coordinate.y };
-          shipsPlaced.push({ x: coordinate.x + i, y: coordinate.y });
+          const currentCoordinate = { x: coordinate.x + i, y: coordinate.y };
+
+          for (const item of shipsPlaced) {
+            console.log('reached');
+            const status = compareCoods(item, currentCoordinate);
+            console.log(status);
+            if (!status) {
+              tempArr.push(currentCoordinate);
+            }
+          }
         }
       } else {
         for (let i = 0; i <= len - 1; i++) {
-          // eslint-disable-next-line no-param-reassign
-          vessel[i] = { x: coordinate.x - i, y: coordinate.y };
-          shipsPlaced.push({ x: coordinate.x - i, y: coordinate.y });
+          const currentCoordinate = { x: coordinate.x - i, y: coordinate.y };
+          for (const item of shipsPlaced) {
+            if (!compareCoods(item, currentCoordinate)) {
+              tempArr.push(currentCoordinate);
+            }
+          }
         }
       }
     } else if (orientation === 'vertical') {
       if (coordinate.y < max) {
         for (let i = 0; i <= len - 1; i++) {
-          // eslint-disable-next-line no-param-reassign
-          vessel[i] = { x: coordinate.x, y: coordinate.y + i };
-          shipsPlaced.push({ x: coordinate.x, y: coordinate.y + i });
+          const currentCoordinate = { x: coordinate.x, y: coordinate.y + i };
+          for (const item of shipsPlaced) {
+            if (!compareCoods(item, currentCoordinate)) {
+              tempArr.push(currentCoordinate);
+            }
+          }
         }
       } else {
         for (let i = 0; i <= len - 1; i++) {
-          // eslint-disable-next-line no-param-reassign
-          vessel[i] = { x: coordinate.x, y: coordinate.y - i };
-          shipsPlaced.push({ x: coordinate.x, y: coordinate.y - i });
+          const currentCoordinate = { x: coordinate.x, y: coordinate.y - i };
+          for (const item of shipsPlaced) {
+            if (!compareCoods(item, currentCoordinate)) {
+              tempArr.push(currentCoordinate);
+            }
+          }
         }
       }
     }
+
+    if (tempArr.length !== len) return [];
+
+    tempArr.forEach((item) => shipsPlaced.push(item));
+    return tempArr;
   };
 
   const createCarrier = (coordinate, orientation) => {
     const carrier = Ship(5, orientation);
     ships.carrier.name = carrier;
 
-    placeShip(5, orientation, coordinate, 6, ships.carrier.coordinates);
+    ships.carrier.coordinates = placeShip(5, orientation, coordinate, 6);
+
+    return ships.carrier.coordinates.length === 5;
   };
 
   const createBattleship = (coordinate, orientation) => {
     const battleship = Ship(4, orientation);
     ships.battleship.name = battleship;
 
-    placeShip(4, orientation, coordinate, 7, ships.battleship.coordinates);
+    ships.battleship.coordinates = placeShip(4, orientation, coordinate, 7);
+
+    return ships.battleship.coordinates.length === 4;
   };
 
   const createDestroyer = (coordinate, orientation) => {
     const destroyer = Ship(3, orientation);
     ships.destroyer.name = destroyer;
 
-    placeShip(3, orientation, coordinate, 8, ships.destroyer.coordinates);
+    ships.destroyer.coordinates = placeShip(3, orientation, coordinate, 8);
+
+    return ships.destroyer.coordinates.length === 3;
   };
 
   const createSubmarine = (coordinate, orientation) => {
     const submarine = Ship(3, orientation);
     ships.submarine.name = submarine;
 
-    placeShip(3, orientation, coordinate, 8, ships.submarine.coordinates);
+    ships.submarine.coordinates = placeShip(3, orientation, coordinate, 8);
+
+    return ships.submarine.coordinates.length === 3;
   };
 
   const createBoat = (coordinate, orientation) => {
     const patrolBoat = Ship(2, orientation);
     ships.patrolBoat.name = patrolBoat;
 
-    placeShip(2, orientation, coordinate, 9, ships.patrolBoat.coordinates);
+    ships.patrolBoat.coordinates = placeShip(2, orientation, coordinate, 9);
+
+    return ships.patrolBoat.coordinates.length === 2;
   };
 
   const checkCoordinate = (obj, x, y) => {
@@ -154,14 +208,8 @@ const Gameboard = () => {
   };
 
   const receiveAttack = (coordinate) => {
-    const currentPlay = plays.forEach((item) => checkCoordinate(item, coordinate.x, coordinate.y));
-    console.log(currentPlay);
-    if (currentPlay) {
-      console.log('true');
-    } else {
-      plays.push(coordinate);
-      checkShip(coordinate);
-    }
+    plays.push(coordinate);
+    checkShip(coordinate);
   };
 
   const shipsSunk = () => {
@@ -170,7 +218,6 @@ const Gameboard = () => {
     if (!ships.destroyer.sunkStatus) return false;
     if (!ships.submarine.sunkStatus) return false;
     if (!ships.patrolBoat.sunkStatus) return false;
-    console.log('you win the game');
     return true;
   };
 
@@ -186,21 +233,9 @@ const Gameboard = () => {
     createBoat,
     receiveAttack,
     shipsSunk,
+    checkCoordinate,
   };
 };
-
-function setCoordinate(a, b) {
-  return {
-    x: a,
-    y: b,
-  };
-}
-
-function generateRandomCoordinates() {
-  const a = Math.floor(Math.random() * 10);
-  const b = Math.floor(Math.random() * 10);
-  return setCoordinate(a, b);
-}
 
 export {
   Ship,
