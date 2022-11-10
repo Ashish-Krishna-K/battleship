@@ -8,6 +8,7 @@ import {
   getOrient,
   setInstruction,
   getwinnerDisplay,
+  renderCompShips,
 } from './dom-manipulation';
 
 let gameOver = false;
@@ -22,20 +23,10 @@ let placementCounter = 0;
 
 function broadcastWinner(who) {
   winnerDisplay.gameWinner.textContent = `${who} wins the game`;
-  console.log(
-    playerBoard.ships.carrier.sunkStatus,
-    playerBoard.ships.battleship.sunkStatus,
-    playerBoard.ships.destroyer.sunkStatus,
-    playerBoard.ships.submarine.sunkStatus,
-    playerBoard.ships.patrolBoat.sunkStatus,
-  );
-  console.log(
-    computerBoard.ships.carrier.sunkStatus,
-    computerBoard.ships.battleship.sunkStatus,
-    computerBoard.ships.destroyer.sunkStatus,
-    computerBoard.ships.submarine.sunkStatus,
-    computerBoard.ships.patrolBoat.sunkStatus,
-  );
+}
+
+function handleInfiniteLoop() {
+  alert('Oops! Something went wrong!\nPlease reload the page!');
 }
 
 function placeShips(ship, coordinate, orient) {
@@ -77,26 +68,73 @@ export function placeShipController(event) {
   placeShips(ship, coordinate, getOrient());
   renderShip(playerBoard);
 }
+let counter = 0;
 
 export function initiateGame() {
-  if (!computerBoard.createCarrier(generateRandomCoordinates(), 'horizontal')) {
-    initiateGame();
+  let shipPlacement = null;
+  if (computerBoard.ships.carrier.coordinates.length !== 5) {
+    shipPlacement = computerBoard.createCarrier(generateRandomCoordinates(), 'horizontal');
+    if (!shipPlacement) {
+      if (counter > 1000) {
+        handleInfiniteLoop();
+        return;
+      }
+      counter++;
+      initiateGame();
+      return;
+    }
   }
-  if (!computerBoard.createBattleship(generateRandomCoordinates(), 'vertical')) {
-    initiateGame();
+  if (computerBoard.ships.battleship.coordinates.length !== 4) {
+    shipPlacement = computerBoard.createBattleship(generateRandomCoordinates(), 'vertical');
+    if (!shipPlacement) {
+      if (counter > 2000) {
+        handleInfiniteLoop();
+        return;
+      }
+      counter++;
+      initiateGame();
+      return;
+    }
   }
-  if (!computerBoard.createDestroyer(generateRandomCoordinates(), 'horizontal')) {
-    initiateGame();
+  if (computerBoard.ships.destroyer.coordinates.length !== 3) {
+    shipPlacement = computerBoard.createDestroyer(generateRandomCoordinates(), 'horizontal');
+    if (!shipPlacement) {
+      if (counter > 3000) {
+        handleInfiniteLoop();
+        return;
+      }
+      counter++;
+      initiateGame();
+      return;
+    }
   }
-  if (!computerBoard.createSubmarine(generateRandomCoordinates(), 'vertical')) {
-    initiateGame();
+  if (computerBoard.ships.submarine.coordinates.length !== 3) {
+    shipPlacement = computerBoard.createSubmarine(generateRandomCoordinates(), 'vertical');
+    if (!shipPlacement) {
+      if (counter > 4000) {
+        handleInfiniteLoop();
+        return;
+      }
+      counter++;
+      initiateGame();
+      return;
+    }
   }
-  if (!computerBoard.createBoat(generateRandomCoordinates(), 'horizontal')) {
-    initiateGame();
+  if (computerBoard.ships.patrolBoat.coordinates.length !== 2) {
+    shipPlacement = computerBoard.createBoat(generateRandomCoordinates(), 'horizontal');
+    if (!shipPlacement) {
+      if (counter > 5000) {
+        handleInfiniteLoop();
+        return;
+      }
+      counter++;
+      initiateGame();
+    }
   }
+  renderCompShips(computerBoard);
 }
 
-export function playRound(coordinate) {
+export function playRound(coordinate, board) {
   if (gameOver) return;
 
   let currentPlay;
@@ -107,8 +145,7 @@ export function playRound(coordinate) {
 
   if (currentPlay) return;
 
-  computerBoard.receiveAttack(coordinate);
-  console.log(computerBoard.plays.length);
+  computerBoard.receiveAttack(coordinate, board);
   markPlay(coordinate, 'player');
 
   if (computerBoard.shipsSunk()) {
@@ -116,12 +153,13 @@ export function playRound(coordinate) {
     gameOver = true;
     return;
   }
-  computerPlayer(playerBoard);
-  console.log(playerBoard.plays.length);
-  if (playerBoard.shipsSunk()) {
-    broadcastWinner('Computer');
-    gameOver = true;
-  }
+  setTimeout(() => {
+    computerPlayer(playerBoard);
+    if (playerBoard.shipsSunk()) {
+      broadcastWinner('Computer');
+      gameOver = true;
+    }
+  }, 500);
 }
 
 export { placementCounter };

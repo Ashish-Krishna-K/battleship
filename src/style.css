@@ -51,11 +51,15 @@ html, body {
 }
 
 .ship {
-    background-color: gray;
+    background-color: yellow;
 }
 
 .mark {
-    background-color: red;
+    background-color: lightgreen;
+}
+
+.mark.ship {
+    background-color: lightcoral;
 }
 
 .hidden {

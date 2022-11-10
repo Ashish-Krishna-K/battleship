@@ -21,12 +21,10 @@ const computerPlayer = (playerBoard) => {
   const legalMove = checkLegal(playerBoard.plays, compPlay);
 
   if (!legalMove) {
-    console.log('illegal', compPlay);
     computerPlayer(playerBoard);
     return;
   }
 
-  console.log(compPlay);
   playerBoard.receiveAttack(compPlay);
   markPlay(compPlay, 'computer');
 };

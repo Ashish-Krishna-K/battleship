@@ -1,3 +1,5 @@
+import { markShip, broadcastSunkShip } from './dom-manipulation';
+
 /* eslint-disable no-restricted-syntax */
 const Ship = (length, orientation) => {
   let hp = length;
@@ -37,8 +39,6 @@ function generateRandomCoordinates() {
 function compareCoods(cod1, cod2) {
   const obj1 = JSON.stringify(cod1);
   const obj2 = JSON.stringify(cod2);
-  console.log(obj1, obj2);
-  console.log(obj1 === obj2);
   return obj1 === obj2;
 }
 
@@ -61,52 +61,37 @@ const Gameboard = () => {
       if (coordinate.x < max) {
         for (let i = 0; i <= len - 1; i++) {
           const currentCoordinate = { x: coordinate.x + i, y: coordinate.y };
-
-          for (const item of shipsPlaced) {
-            console.log('reached');
-            const status = compareCoods(item, currentCoordinate);
-            console.log(status);
-            if (!status) {
-              tempArr.push(currentCoordinate);
-            }
-          }
+          tempArr.push(currentCoordinate);
         }
       } else {
         for (let i = 0; i <= len - 1; i++) {
           const currentCoordinate = { x: coordinate.x - i, y: coordinate.y };
-          for (const item of shipsPlaced) {
-            if (!compareCoods(item, currentCoordinate)) {
-              tempArr.push(currentCoordinate);
-            }
-          }
+          tempArr.push(currentCoordinate);
         }
       }
     } else if (orientation === 'vertical') {
       if (coordinate.y < max) {
         for (let i = 0; i <= len - 1; i++) {
           const currentCoordinate = { x: coordinate.x, y: coordinate.y + i };
-          for (const item of shipsPlaced) {
-            if (!compareCoods(item, currentCoordinate)) {
-              tempArr.push(currentCoordinate);
-            }
-          }
+          tempArr.push(currentCoordinate);
         }
       } else {
         for (let i = 0; i <= len - 1; i++) {
           const currentCoordinate = { x: coordinate.x, y: coordinate.y - i };
-          for (const item of shipsPlaced) {
-            if (!compareCoods(item, currentCoordinate)) {
-              tempArr.push(currentCoordinate);
-            }
-          }
+          tempArr.push(currentCoordinate);
         }
       }
     }
 
-    if (tempArr.length !== len) return [];
-
-    tempArr.forEach((item) => shipsPlaced.push(item));
-    return tempArr;
+    const newTempArray = tempArr.filter((item) => {
+      for (const obj of shipsPlaced) {
+        if (compareCoods(item, obj)) return false;
+      }
+      return true;
+    });
+    if (newTempArray.length !== len) return [];
+    newTempArray.forEach((item) => shipsPlaced.push(item));
+    return newTempArray;
   };
 
   const createCarrier = (coordinate, orientation) => {
@@ -161,14 +146,23 @@ const Gameboard = () => {
     return false;
   };
 
-  const checkShip = (coordinate) => {
+  const checkShip = (coordinate, player) => {
+    let displayPlayer;
+
+    if (player === 'computer')displayPlayer = 'player';
+    if (player === undefined) displayPlayer = 'computer';
+
     let status = false;
 
     for (const item of ships.carrier.coordinates) {
       status = checkCoordinate(item, coordinate.x, coordinate.y);
       if (status) {
         ships.carrier.name.isHit();
+        if (player === 'computer') markShip(coordinate);
         ships.carrier.sunkStatus = ships.carrier.name.isSunk();
+        if (ships.carrier.sunkStatus) {
+          broadcastSunkShip('carrier', displayPlayer);
+        }
         return;
       }
     }
@@ -176,7 +170,11 @@ const Gameboard = () => {
       status = checkCoordinate(item, coordinate.x, coordinate.y);
       if (status) {
         ships.battleship.name.isHit();
+        if (player === 'computer') markShip(coordinate);
         ships.battleship.sunkStatus = ships.battleship.name.isSunk();
+        if (ships.battleship.sunkStatus) {
+          broadcastSunkShip('battleship', displayPlayer);
+        }
         return;
       }
     }
@@ -184,7 +182,11 @@ const Gameboard = () => {
       status = checkCoordinate(item, coordinate.x, coordinate.y);
       if (status) {
         ships.destroyer.name.isHit();
+        if (player === 'computer') markShip(coordinate);
         ships.destroyer.sunkStatus = ships.destroyer.name.isSunk();
+        if (ships.destroyer.sunkStatus) {
+          broadcastSunkShip('destroyer', displayPlayer);
+        }
         return;
       }
     }
@@ -192,7 +194,11 @@ const Gameboard = () => {
       status = checkCoordinate(item, coordinate.x, coordinate.y);
       if (status) {
         ships.submarine.name.isHit();
+        if (player === 'computer') markShip(coordinate);
         ships.submarine.sunkStatus = ships.submarine.name.isSunk();
+        if (ships.submarine.sunkStatus) {
+          broadcastSunkShip('submarine', displayPlayer);
+        }
         return;
       }
     }
@@ -200,16 +206,20 @@ const Gameboard = () => {
       status = checkCoordinate(item, coordinate.x, coordinate.y);
       if (status) {
         ships.patrolBoat.name.isHit();
+        if (player === 'computer') markShip(coordinate);
         ships.patrolBoat.sunkStatus = ships.patrolBoat.name.isSunk();
+        if (ships.patrolBoat.sunkStatus) {
+          broadcastSunkShip('patrol boat', displayPlayer);
+        }
         return;
       }
     }
     missed.push(coordinate);
   };
 
-  const receiveAttack = (coordinate) => {
+  const receiveAttack = (coordinate, player) => {
     plays.push(coordinate);
-    checkShip(coordinate);
+    checkShip(coordinate, player);
   };
 
   const shipsSunk = () => {

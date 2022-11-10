@@ -2,17 +2,23 @@ import { setCoordinate } from './classes';
 
 const playerBoard = document.querySelector('#player-board');
 const computerBoard = document.querySelector('#computer-board');
-const placeShipsBoard = document.querySelector('#place-ships');
 const displayShipName = document.querySelector('#ship-name');
 const orientation = document.querySelector('#orientation');
 const gameWinner = document.querySelector('#game-winner');
 const roundWinner = document.querySelector('#round-winner');
+const insturctionsDiv = document.querySelector('#inst');
 
 export function getOrient() {
   return orientation.value;
 }
 
 export function setInstruction(string) {
+  if (string === '') {
+    displayShipName.textContent = '';
+    displayShipName.classList.toggle('hidden');
+    insturctionsDiv.textContent = 'Play Game!';
+    return;
+  }
   displayShipName.textContent = `Place your ${string}`;
   displayShipName.dataset.ship = string;
 }
@@ -43,25 +49,11 @@ export function renderPlayerBoard() {
       const cell = document.createElement('div');
       const data = setCoordinate(i, j);
       cell.dataset.coordinates = JSON.stringify(data);
+      cell.dataset.who = 'player';
       cell.classList.add('cell');
       row.appendChild(cell);
     }
     playerBoard.appendChild(row);
-  }
-}
-
-export function renderPlaceShipsBoard() {
-  for (let i = 0; i < 10; i++) {
-    const row = document.createElement('div');
-    row.classList.add('rows');
-    for (let j = 0; j < 10; j++) {
-      const cell = document.createElement('div');
-      const data = setCoordinate(i, j);
-      cell.dataset.coordinates = JSON.stringify(data);
-      cell.classList.add('cell');
-      row.appendChild(cell);
-    }
-    placeShipsBoard.appendChild(row);
   }
 }
 
@@ -73,6 +65,7 @@ export function renderCompBoard() {
       const cell = document.createElement('div');
       const data = setCoordinate(i, j);
       cell.dataset.coordinates = JSON.stringify(data);
+      cell.dataset.who = 'computer';
       cell.classList.add('cell');
       row.appendChild(cell);
     }
@@ -83,7 +76,15 @@ export function renderCompBoard() {
 export function renderShip(board) {
   const playerCells = document.querySelectorAll('#player-board .cell');
   const cellsArray = Array.from(playerCells);
-  console.log(board.shipsPlaced);
+  board.shipsPlaced.forEach((item) => {
+    const node = findShipNodes(item, cellsArray);
+    node.classList.add('ship');
+  });
+}
+// delete this below function after testing
+export function renderCompShips(board) {
+  const playerCells = document.querySelectorAll('#computer-board .cell');
+  const cellsArray = Array.from(playerCells);
   board.shipsPlaced.forEach((item) => {
     const node = findShipNodes(item, cellsArray);
     node.classList.add('ship');
@@ -107,6 +108,19 @@ export function markPlay(coordinate, player) {
     });
     node.classList.add('mark');
   }
+}
+
+export function markShip(coordinate) {
+  const computerCells = Array.from(document.querySelectorAll('#computer-board .cell'));
+  const node = computerCells.find((obj) => {
+    const cod = JSON.parse(obj.dataset.coordinates);
+    return cod.x === coordinate.x && cod.y === coordinate.y;
+  });
+  node.classList.add('ship');
+}
+
+export function broadcastSunkShip(name, player) {
+  roundWinner.textContent = `${player} has sunk enemy's ${name}`;
 }
 
 export function getwinnerDisplay() {
