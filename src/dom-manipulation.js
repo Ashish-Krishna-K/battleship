@@ -4,18 +4,23 @@ const playerBoard = document.querySelector('#player-board');
 const computerBoard = document.querySelector('#computer-board');
 const displayShipName = document.querySelector('#ship-name');
 const orientation = document.querySelector('#orientation');
-const gameWinner = document.querySelector('#game-winner');
-const roundWinner = document.querySelector('#round-winner');
 const insturctionsDiv = document.querySelector('#inst');
+const computerName = document.querySelector('#comp');
 
 export function getOrient() {
   return orientation.value;
 }
+export function broadcastWinner(who) {
+  insturctionsDiv.textContent = `${who} wins the game`;
+}
+
+export function clearRoundResult() {
+  displayShipName.textContent = '';
+}
 
 export function setInstruction(string) {
   if (string === '') {
-    displayShipName.textContent = '';
-    displayShipName.classList.toggle('hidden');
+    clearRoundResult();
     insturctionsDiv.textContent = 'Play Game!';
     return;
   }
@@ -29,6 +34,7 @@ export function getInstruction() {
 
 export function changeVisibility() {
   computerBoard.classList.toggle('hidden');
+  computerName.classList.toggle('hidden');
 }
 
 function findShipNodes(object, array) {
@@ -81,7 +87,9 @@ export function renderShip(board) {
     node.classList.add('ship');
   });
 }
+
 // delete this below function after testing
+// decided to keep the function itself(without invoking) just in case.
 export function renderCompShips(board) {
   const playerCells = document.querySelectorAll('#computer-board .cell');
   const cellsArray = Array.from(playerCells);
@@ -120,12 +128,5 @@ export function markShip(coordinate) {
 }
 
 export function broadcastSunkShip(name, player) {
-  roundWinner.textContent = `${player} has sunk enemy's ${name}`;
-}
-
-export function getwinnerDisplay() {
-  return {
-    gameWinner,
-    roundWinner,
-  };
+  displayShipName.textContent = `${player} has sunk enemy's ${name}`;
 }

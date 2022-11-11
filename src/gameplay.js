@@ -7,8 +7,8 @@ import {
   getInstruction,
   getOrient,
   setInstruction,
-  getwinnerDisplay,
-  renderCompShips,
+  broadcastWinner,
+  clearRoundResult,
 } from './dom-manipulation';
 
 let gameOver = false;
@@ -17,13 +17,7 @@ const playerBoard = Gameboard();
 
 const computerBoard = Gameboard();
 
-const winnerDisplay = getwinnerDisplay();
-
 let placementCounter = 0;
-
-function broadcastWinner(who) {
-  winnerDisplay.gameWinner.textContent = `${who} wins the game`;
-}
 
 function handleInfiniteLoop() {
   alert('Oops! Something went wrong!\nPlease reload the page!');
@@ -131,10 +125,10 @@ export function initiateGame() {
       initiateGame();
     }
   }
-  renderCompShips(computerBoard);
 }
 
 export function playRound(coordinate, board) {
+  clearRoundResult();
   if (gameOver) return;
 
   let currentPlay;
