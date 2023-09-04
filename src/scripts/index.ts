@@ -1,2 +1,2 @@
-// render initial page
+// render placeShipsBoard
 

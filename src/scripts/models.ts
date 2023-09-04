@@ -1,3 +1,5 @@
+import EventsObserver from "./eventsObserver";
+
 export class Ship {
   #length: number;
   #hits: number = 0;
@@ -125,13 +127,16 @@ export class GameBoard {
   get attackedTiles() {
     return this.#allHits.slice();
   }
+  get shipsPlacedTiles() {
+    return this.#shipTiles.slice();
+  } 
   get carrier() {
     if (this.#carrier === null) return null
     return Object.create(this.#carrier);
   }
   get carrierCoordinates() {
     if (this.#carrier === null) return null
-    return this.#shipTiles
+    return this.shipsPlacedTiles
       .filter(ship => JSON.stringify(ship.ship) === JSON.stringify(this.#carrier))
       .map(ship => ship.coordinate)
   }
@@ -141,7 +146,7 @@ export class GameBoard {
   }
   get battleshipCoordinates() {
     if (this.#battleship === null) return null;
-    return this.#shipTiles
+    return this.shipsPlacedTiles
       .filter(ship => JSON.stringify(ship.ship) === JSON.stringify(this.#battleship))
       .map(ship => ship.coordinate)
   }
@@ -151,7 +156,7 @@ export class GameBoard {
   }
   get destroyerCoordinates() {
     if (this.#destroyer === null) return null;
-    return this.#shipTiles
+    return this.shipsPlacedTiles
       .filter(ship => JSON.stringify(ship.ship) === JSON.stringify(this.#destroyer))
       .map(ship => ship.coordinate);
   }
@@ -161,7 +166,7 @@ export class GameBoard {
   }
   get submarineCoordinates() {
     if (this.#submarine === null) return null;
-    return this.#shipTiles
+    return this.shipsPlacedTiles
       .filter(ship => JSON.stringify(ship.ship) === JSON.stringify(this.#submarine))
       .map(ship => ship.coordinate);
   }
@@ -171,7 +176,7 @@ export class GameBoard {
   }
   get patrolBoatCoordinates() {
     if (this.#patrolBoat === null) return null;
-    return this.#shipTiles
+    return this.shipsPlacedTiles
       .filter(ship => JSON.stringify(ship.ship) === JSON.stringify(this.#patrolBoat))
       .map(ship => ship.coordinate);
   }
@@ -182,8 +187,9 @@ export class GameBoard {
     this.#shipTiles.forEach(tile => {
       if (JSON.stringify(tile.coordinate) === JSON.stringify(coordinate)) {
         tile.ship.hit();
+        EventsObserver.publish("shipIsHit", {data: coordinate});
       }
-    })
+    });
     return true;
   }
   allShipsSunk(callback?: (answer: boolean) => any) {

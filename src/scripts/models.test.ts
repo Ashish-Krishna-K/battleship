@@ -1,3 +1,4 @@
+import EventsObserver from './eventsObserver';
 import {
   Ship,
   GameBoard
@@ -259,6 +260,14 @@ describe("tests the Gameboard factory", () => {
     gameBoard.receiveAttack({x: 9, y: 9});
     expect(gameBoard.attackedTiles).toStrictEqual(tiles);
   });
+  test("gameboard publishes a message if a ship was hit", () => {
+    const mockCallback = jest.fn(data => data.data);
+    EventsObserver.subscribe("shipIsHit", mockCallback);
+    gameBoard.placeCarrier({x: 0, y:0}, "horizontal");
+    gameBoard.receiveAttack({x: 0, y: 0});
+    expect(mockCallback.mock.calls).toHaveLength(1);
+    expect(mockCallback.mock.results[0].value).toStrictEqual({x: 0, y: 0});
+  })
   test("gameboard doesn't record an attack if the same tile is already attacked", () => {
     const tiles = [
       {x: 0, y: 0},
