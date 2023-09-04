@@ -1,0 +1,33 @@
+.game-container>div {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+  gap: 15px;
+}
+
+.board-container {
+  height: 500px;
+  width: 500px;
+}
+
+.board-container>div {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.tile {
+  min-height: 50px;
+  border: 1px solid black;
+}
+
+.tile.ship {
+  background-color: gray;
+}
+
+.tile.attacked {
+  background-color: lightblue;
+}
+
+.tile.ship.attacked {
+  background-color: lightcoral;
+}

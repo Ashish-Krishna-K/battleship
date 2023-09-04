@@ -1,31 +1,30 @@
-interface ShipType {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export interface ShipType {
   hits: number;
   hit: () => void;
-  isSunk: () => boolean
+  isSunk: () => boolean;
 }
 
-type CoordinatesType = {
+export interface CoordinatesType {
   x: number;
   y: number;
-}
+};
 
-type ShipMarkersType = {
+export interface ShipMarkersType {
   coordinate: CoordinatesType;
   ship: ShipType;
-}
+};
 
-type EventPayloadType = {
-  data: any
-}
+export interface EventPayloadType {
+  data: any;
+};
 
-type EventHandlerType = (payload: EventPayloadType) => any;
+export type EventHandlerType = (payload: EventPayloadType) => any;
 
-type EventsType = {
-  [key: string]: EventHandlerType[]
-}
+export type EventsType = Record<string, EventHandlerType[]>;
 
-interface EventsObserverType {
-  events: EventsType,
-  subscribe: (eventName: string, eventHandler: EventHandlerType) => void,
-  publish: (eventName: string, eventPayload: EventPayloadType) => void
+export interface EventsObserverType {
+  events: EventsType;
+  subscribe: (eventName: string, eventHandler: EventHandlerType) => void;
+  publish: (eventName: string, eventPayload: EventPayloadType) => void;
 }

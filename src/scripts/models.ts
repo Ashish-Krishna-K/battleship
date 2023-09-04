@@ -1,45 +1,59 @@
-import EventsObserver from "./eventsObserver";
+/* eslint-disable max-classes-per-file */
+import EventsObserver from './eventsObserver'
+import { type CoordinatesType, type ShipMarkersType } from '../types/appTypes'
 
 export class Ship {
-  #length: number;
-  #hits: number = 0;
-  constructor(shipLength: number) {
-    this.#length = shipLength;
+  #length: number
+
+  #hits: number = 0
+
+  constructor (shipLength: number) {
+    this.#length = shipLength
   }
-  get hits() {
-    return this.#hits;
+
+  get hits (): number {
+    return this.#hits
   }
-  hit() {
-    this.#hits += 1;
+
+  hit (): void {
+    this.#hits += 1
   }
-  isSunk() {
-    return this.#hits >= this.#length;
+
+  isSunk (): boolean {
+    return this.#hits >= this.#length
   }
 }
 
 export class GameBoard {
-  #name: string;
-  #allHits: CoordinatesType[] = [];
-  #shipTiles: ShipMarkersType[] = [];
-  #carrier: Ship = null;
-  #battleship: Ship = null;
-  #destroyer: Ship = null;
-  #submarine: Ship = null;
-  #patrolBoat: Ship = null;
+  #name: string
 
-  constructor(boardName: string) {
-    this.#name = boardName;
+  #allHits: CoordinatesType[] = []
+
+  #shipTiles: ShipMarkersType[] = []
+
+  #carrier: Ship | null = null
+
+  #battleship: Ship | null = null
+
+  #destroyer: Ship | null = null
+
+  #submarine: Ship | null = null
+
+  #patrolBoat: Ship | null = null
+
+  constructor (boardName: string) {
+    this.#name = boardName
   }
 
-  get name(){
-    return this.#name;
+  get name (): string {
+    return this.#name
   }
-
-  #generateHorizontalCoordinates(start: CoordinatesType, length: number) {
-    const coordinatesArray: CoordinatesType[] = [];
+  
+  #generateHorizontalCoordinates (start: CoordinatesType, length: number): CoordinatesType[] {
+    const coordinatesArray: CoordinatesType[] = []
 
     for (let i = 0; i < length; i++) {
-      let coordinate;
+      let coordinate
       if (start.x + length < 9) {
         coordinate = {
           x: start.x + i,
@@ -51,17 +65,17 @@ export class GameBoard {
           y: start.y
         }
       }
-      coordinatesArray.push(coordinate);
+      coordinatesArray.push(coordinate)
     }
-    
-    return coordinatesArray;
+
+    return coordinatesArray
   }
 
-  #generateVerticalCoordinates(start: CoordinatesType, length: number) {
+  #generateVerticalCoordinates (start: CoordinatesType, length: number): CoordinatesType[] {
     const coordinatesArray: CoordinatesType[] = []
-    
+
     for (let i = 0; i < length; i++) {
-      let coordinate;
+      let coordinate
       if (start.y + length < 9) {
         coordinate = {
           x: start.x,
@@ -73,148 +87,178 @@ export class GameBoard {
           y: start.y - i
         }
       }
-      coordinatesArray.push(coordinate);
+      coordinatesArray.push(coordinate)
     }
 
-    return coordinatesArray;
+    return coordinatesArray
   }
 
-  #placeAship = (startCoordinate: CoordinatesType, orientation: string, shipLength: number) => {
-    const ship = new Ship(shipLength);
+  #placeAship (startCoordinate: CoordinatesType, orientation: string, shipLength: number): Ship | null {
+    const ship = new Ship(shipLength)
     let coordinates = []
-    if (orientation === "horizontal") {
-      coordinates = this.#generateHorizontalCoordinates(startCoordinate, shipLength);
+    if (orientation === 'horizontal') {
+      coordinates = this.#generateHorizontalCoordinates(startCoordinate, shipLength)
     } else {
-      coordinates = this.#generateVerticalCoordinates(startCoordinate, shipLength);
+      coordinates = this.#generateVerticalCoordinates(startCoordinate, shipLength)
     }
-    coordinates = coordinates.map(coord => {
+    coordinates = coordinates.map((coord) => {
       return {
         coordinate: coord,
-        ship: ship 
+        ship
       }
     })
-    const coordinateExists = coordinates.some(coord => {
-      return this.#shipTiles.some(tile => JSON.stringify(tile) === JSON.stringify(coord));
+    const coordinateExists = coordinates.some((coord) => {
+      return this.#shipTiles.some((tile) => JSON.stringify(tile) === JSON.stringify(coord))
     })
     if (!coordinateExists) {
-      this.#shipTiles.push(...coordinates);
-      return ship;
+      this.#shipTiles.push(...coordinates)
+      return ship
     }
-    return null;
+    return null
   }
 
-  placeCarrier(startCoordinate: CoordinatesType, orientation: string) {
-    const carrier = this.#placeAship(startCoordinate, orientation, 5);
-    if (carrier === null) return false;
-    this.#carrier = carrier;
-    return true;
+  placeCarrier (startCoordinate: CoordinatesType, orientation: string): boolean {
+    const carrier = this.#placeAship(startCoordinate, orientation, 5)
+    if (carrier === null) return false
+    this.#carrier = carrier
+    return true
   }
-  placeBattleship(startCoordinate: CoordinatesType, orientation: string) {
-    const battleship = this.#placeAship(startCoordinate, orientation, 4);
-    if (battleship === null) return false;
-    this.#battleship = battleship;
-    return true;
+
+  placeBattleship (startCoordinate: CoordinatesType, orientation: string): boolean {
+    const battleship = this.#placeAship(startCoordinate, orientation, 4)
+    if (battleship === null) return false
+    this.#battleship = battleship
+    return true
   }
-  placeDestroyer(startCoordinate: CoordinatesType, orientation: string) {
-    const destroyer = this.#placeAship(startCoordinate, orientation, 3);
-    if (destroyer === null) return false;
-    this.#destroyer = destroyer;
-    return true;
+
+  placeDestroyer (startCoordinate: CoordinatesType, orientation: string): boolean {
+    const destroyer = this.#placeAship(startCoordinate, orientation, 3)
+    if (destroyer === null) return false
+    this.#destroyer = destroyer
+    return true
   }
-  placeSubmarine(startCoordinate: CoordinatesType, orientation: string) {
-    const submarine = this.#placeAship(startCoordinate, orientation, 3);
-    if (submarine === null) return false;
-    this.#submarine = submarine;
-    return true;
+
+  placeSubmarine (startCoordinate: CoordinatesType, orientation: string): boolean {
+    const submarine = this.#placeAship(startCoordinate, orientation, 3)
+    if (submarine === null) return false
+    this.#submarine = submarine
+    return true
   }
-  placePatrolBoat(startCoordinate: CoordinatesType, orientation: string) {
-    const patrolBoat = this.#placeAship(startCoordinate, orientation, 2);
-    if (patrolBoat === null) return false;
-    this.#patrolBoat = patrolBoat;
-    return true;
+
+  placePatrolBoat (startCoordinate: CoordinatesType, orientation: string): boolean {
+    const patrolBoat = this.#placeAship(startCoordinate, orientation, 2)
+    if (patrolBoat === null) return false
+    this.#patrolBoat = patrolBoat
+    return true
   }
-  get attackedTiles() {
-    return this.#allHits.slice();
+
+  get attackedTiles (): CoordinatesType[] {
+    return this.#allHits.slice()
   }
-  get shipsPlacedTiles() {
-    return this.#shipTiles.slice();
-  } 
-  get carrier() {
+
+  get shipsPlacedTiles (): ShipMarkersType[] {
+    return this.#shipTiles.slice()
+  }
+
+  get carrier (): Ship | null {
     if (this.#carrier === null) return null
-    return Object.create(this.#carrier);
+    return Object.create(this.#carrier)
   }
-  get carrierCoordinates() {
+
+  get carrierCoordinates (): CoordinatesType[] | null {
     if (this.#carrier === null) return null
     return this.shipsPlacedTiles
-      .filter(ship => JSON.stringify(ship.ship) === JSON.stringify(this.#carrier))
-      .map(ship => ship.coordinate)
+      .filter((ship) => JSON.stringify(ship.ship) === JSON.stringify(this.#carrier))
+      .map((ship) => ship.coordinate)
   }
-  get battleship() {
+
+  get battleship (): Ship | null {
     if (this.#battleship === null) return null
-    return Object.create(this.#battleship);
+    return Object.create(this.#battleship)
   }
-  get battleshipCoordinates() {
-    if (this.#battleship === null) return null;
+
+  get battleshipCoordinates (): CoordinatesType[] | null {
+    if (this.#battleship === null) return null
     return this.shipsPlacedTiles
-      .filter(ship => JSON.stringify(ship.ship) === JSON.stringify(this.#battleship))
-      .map(ship => ship.coordinate)
+      .filter((ship) => JSON.stringify(ship.ship) === JSON.stringify(this.#battleship))
+      .map((ship) => ship.coordinate)
   }
-  get destroyer() {
-    if (this.#destroyer === null) return null;
-    return Object.create(this.#destroyer);
+
+  get destroyer (): Ship | null {
+    if (this.#destroyer === null) return null
+    return Object.create(this.#destroyer)
   }
-  get destroyerCoordinates() {
-    if (this.#destroyer === null) return null;
+
+  get destroyerCoordinates (): CoordinatesType[] | null {
+    if (this.#destroyer === null) return null
     return this.shipsPlacedTiles
-      .filter(ship => JSON.stringify(ship.ship) === JSON.stringify(this.#destroyer))
-      .map(ship => ship.coordinate);
+      .filter((ship) => JSON.stringify(ship.ship) === JSON.stringify(this.#destroyer))
+      .map((ship) => ship.coordinate)
   }
-  get submarine() {
-    if (this.#submarine === null) return null;
-    return Object.create(this.#submarine);
+
+  get submarine (): Ship | null {
+    if (this.#submarine === null) return null
+    return Object.create(this.#submarine)
   }
-  get submarineCoordinates() {
-    if (this.#submarine === null) return null;
+
+  get submarineCoordinates (): CoordinatesType[] | null {
+    if (this.#submarine === null) return null
     return this.shipsPlacedTiles
-      .filter(ship => JSON.stringify(ship.ship) === JSON.stringify(this.#submarine))
-      .map(ship => ship.coordinate);
+      .filter((ship) => JSON.stringify(ship.ship) === JSON.stringify(this.#submarine))
+      .map((ship) => ship.coordinate)
   }
-  get patrolBoat() {
-    if (this.#patrolBoat === null) return null;
-    return Object.create(this.#patrolBoat);
+
+  get patrolBoat (): Ship | null {
+    if (this.#patrolBoat === null) return null
+    return Object.create(this.#patrolBoat)
   }
-  get patrolBoatCoordinates() {
-    if (this.#patrolBoat === null) return null;
+
+  get patrolBoatCoordinates (): CoordinatesType[] | null {
+    if (this.#patrolBoat === null) return null
     return this.shipsPlacedTiles
-      .filter(ship => JSON.stringify(ship.ship) === JSON.stringify(this.#patrolBoat))
-      .map(ship => ship.coordinate);
+      .filter((ship) => JSON.stringify(ship.ship) === JSON.stringify(this.#patrolBoat))
+      .map((ship) => ship.coordinate)
   }
-  receiveAttack(coordinate: CoordinatesType) {
-    const alreadyHit = this.#allHits.some(tile => JSON.stringify(tile) === JSON.stringify(coordinate));
-    if (alreadyHit) return false;
-    this.#allHits.push(coordinate);
-    this.#shipTiles.forEach(tile => {
+
+  receiveAttack (coordinate: CoordinatesType): boolean {
+    const alreadyHit = this.#allHits.some((tile) => JSON.stringify(tile) === JSON.stringify(coordinate))
+    if (alreadyHit) return false
+    this.#allHits.push(coordinate)
+    this.#shipTiles.forEach((tile) => {
       if (JSON.stringify(tile.coordinate) === JSON.stringify(coordinate)) {
-        tile.ship.hit();
-        EventsObserver.publish("shipIsHit", {data: {
-          coordinate,
-          board: this
-        }});
+        tile.ship.hit()
+        EventsObserver.publish('shipIsHit', {
+          data: {
+            coordinate,
+            board: this.name
+          }
+        })
       }
-    });
-    return true;
+    })
+    EventsObserver.publish('tileIsHit', {
+      data: {
+        coordinate,
+        board: this.name
+      }
+    })
+    return true
   }
-  allShipsSunk() {
+
+  allShipsSunk (): boolean {
     if (
-      this.#carrier.isSunk() && 
+      this.#carrier !== null &&
+      this.#carrier.isSunk() &&
+      this.#battleship !== null &&
       this.#battleship.isSunk() &&
+      this.#destroyer !== null &&
       this.#destroyer.isSunk() &&
+      this.#submarine !== null &&
       this.#submarine.isSunk() &&
+      this.#patrolBoat !== null &&
       this.#patrolBoat.isSunk()
-      ) {
-        return true
-      } else {
-        return false
-      }
+    ) {
+      return true
+    }
+    return false
   }
 }
