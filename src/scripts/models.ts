@@ -18,6 +18,7 @@ export class Ship {
 }
 
 export class GameBoard {
+  #name: string;
   #allHits: CoordinatesType[] = [];
   #shipTiles: ShipMarkersType[] = [];
   #carrier: Ship = null;
@@ -25,6 +26,14 @@ export class GameBoard {
   #destroyer: Ship = null;
   #submarine: Ship = null;
   #patrolBoat: Ship = null;
+
+  constructor(boardName: string) {
+    this.#name = boardName;
+  }
+
+  get name(){
+    return this.#name;
+  }
 
   #generateHorizontalCoordinates(start: CoordinatesType, length: number) {
     const coordinatesArray: CoordinatesType[] = [];
@@ -187,12 +196,15 @@ export class GameBoard {
     this.#shipTiles.forEach(tile => {
       if (JSON.stringify(tile.coordinate) === JSON.stringify(coordinate)) {
         tile.ship.hit();
-        EventsObserver.publish("shipIsHit", {data: coordinate});
+        EventsObserver.publish("shipIsHit", {data: {
+          coordinate,
+          board: this
+        }});
       }
     });
     return true;
   }
-  allShipsSunk(callback?: (answer: boolean) => any) {
+  allShipsSunk() {
     if (
       this.#carrier.isSunk() && 
       this.#battleship.isSunk() &&
@@ -200,10 +212,8 @@ export class GameBoard {
       this.#submarine.isSunk() &&
       this.#patrolBoat.isSunk()
       ) {
-        callback(true);
         return true
       } else {
-        callback(false);
         return false
       }
   }

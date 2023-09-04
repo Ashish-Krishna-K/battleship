@@ -34,10 +34,10 @@ describe("tests the Ship class", () => {
 });
 
 describe("tests the Gameboard factory", () => {
-  let gameBoard = new GameBoard();
+  let gameBoard = new GameBoard("player");
 
   beforeEach(() => {
-    gameBoard = new GameBoard();
+    gameBoard = new GameBoard("player");
   })
 
   test("places carrier correctly when placed on left side of board horizontally", () => {
@@ -261,7 +261,7 @@ describe("tests the Gameboard factory", () => {
     expect(gameBoard.attackedTiles).toStrictEqual(tiles);
   });
   test("gameboard publishes a message if a ship was hit", () => {
-    const mockCallback = jest.fn(data => data.data);
+    const mockCallback = jest.fn(data => data.data.coordinate);
     EventsObserver.subscribe("shipIsHit", mockCallback);
     gameBoard.placeCarrier({x: 0, y:0}, "horizontal");
     gameBoard.receiveAttack({x: 0, y: 0});
@@ -285,7 +285,6 @@ describe("tests the Gameboard factory", () => {
   });
 
   test("gameboard reports if all ships have sunk", () => {
-    const mockCallback = jest.fn(bool => bool);
     gameBoard.placeCarrier({x: 0, y:0}, "horizontal");
     gameBoard.placeBattleship({x: 0, y:1}, "horizontal");
     gameBoard.placeDestroyer({x: 0, y:2}, "horizontal");
@@ -308,8 +307,6 @@ describe("tests the Gameboard factory", () => {
     gameBoard.receiveAttack({x: 2, y: 3});
     gameBoard.receiveAttack({x: 0, y: 4});
     gameBoard.receiveAttack({x: 1, y: 4});
-    gameBoard.allShipsSunk(mockCallback);
-    expect(mockCallback.mock.calls).toHaveLength(1);
-    expect(mockCallback.mock.results[0].value).toBe(true);
+    expect(gameBoard.allShipsSunk()).toBe(true);
   });
 })
