@@ -96,11 +96,14 @@ const computerAttacks = (): void => {
   }
 }
 
-const playerAttacks = (coordinates: CoordinatesType): void => {
-  computerBoard.receiveAttack(coordinates);
-  if (computerBoard.allShipsSunk()) {
-    EventsObserver.publish('winnerFound', { data: 'player' })
+const playerAttacks = (coordinates: CoordinatesType): boolean => {
+  const result = computerBoard.receiveAttack(coordinates);
+  if (result) {
+    if (computerBoard.allShipsSunk()) {
+      EventsObserver.publish('winnerFound', { data: 'player' })
+    }
   }
+  return result
 }
 
 const shipHitHandler = (data: EventPayloadType): void => {
@@ -150,8 +153,9 @@ const handleShipPlaced = (): void => {
 }
 
 const handlePlayerAttackRequest = ({data}: EventPayloadType): void => {
-  playerAttacks(data);
-  computerAttacks();
+  if (playerAttacks(data)){
+    computerAttacks();
+  };
 }
 
 const handleMarkShipRequest = ({data}: EventPayloadType): void => {

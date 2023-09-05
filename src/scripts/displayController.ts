@@ -68,7 +68,7 @@ const generateShipCoordinates = (shipType: string, start: CoordinatesType, orien
 }
 
 const renderInstructions = (ship: string): HTMLElement => {
-  const instructions = document.createElement('p');
+  const instructions = document.createElement('h2');
   instructions.dataset.shipType = ship;
   instructions.classList.add('current-ship');
   instructions.textContent = `Place your ${displayShipName(ship)}`;
@@ -140,7 +140,13 @@ const renderPlaceShipsBoard = (): void => {
     const modal = document.createElement('div');
 
     const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = "Cancel"
+    cancelBtn.innerHTML = 
+      `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <title>close</title>
+          <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+        </svg>
+      `
     cancelBtn.classList.add('cancel-btn');
     cancelBtn.addEventListener("click", () => {
       location.reload();
