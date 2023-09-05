@@ -139,7 +139,7 @@ const handleShipPlacementRequest = ({data}: EventPayloadType): void => {
     coordinates,
     orientation
   } = data;
-  placePlayerShips(shipType, coordinates, orientation);
+  if (shipType !== null) placePlayerShips(shipType, coordinates, orientation);
 } 
 
 const handleShipPlaced = (): void => {

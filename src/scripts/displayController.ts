@@ -18,6 +18,55 @@ const displayShipName = (ship: string): string => {
   }
 }
 
+const generateCoordinates = (length: number, start: CoordinatesType, orientation: string): CoordinatesType[] => {
+  const holder: CoordinatesType[] = []
+  for (let i = 0; i < length; i++) {
+    if (orientation === 'horizontal') {
+      if (start.x + length < 9) {
+        holder.push({
+          x: start.x + i,
+          y: start.y
+        })
+      } else {
+        holder.push({
+          x: start.x - i,
+          y: start.y
+        })
+      }
+    } else {
+      if (start.y + length < 9) {
+        holder.push({
+          x: start.x,
+          y: start.y + i
+        })
+      } else {
+        holder.push({
+          x: start.x,
+          y: start.y - i
+        })
+      }
+    }
+  }
+  return holder;
+}
+
+const generateShipCoordinates = (shipType: string, start: CoordinatesType, orientation: string): CoordinatesType[] => {
+  switch(shipType) {
+    case "carrier":
+      return generateCoordinates(5, start, orientation)
+    case "battleship":
+      return generateCoordinates(4, start, orientation)
+    case "destroyer":
+      return generateCoordinates(3, start, orientation)
+    case "submarine":
+      return generateCoordinates(3, start, orientation)
+    case "patrolBoat":
+      return generateCoordinates(2, start, orientation)
+    default:
+      return []
+  }
+}
+
 const renderInstructions = (ship: string): HTMLElement => {
   const instructions = document.createElement('p');
   instructions.dataset.shipType = ship;
@@ -28,6 +77,7 @@ const renderInstructions = (ship: string): HTMLElement => {
 
 const renderOrientationControl = (): HTMLButtonElement => {
   const orientationControl = document.createElement('button')
+  orientationControl.classList.add('orientaion-control');
   orientationControl.value = "horizontal"
   orientationControl.textContent = "Rotate"
   orientationControl.addEventListener("click", function(this: HTMLButtonElement) {
@@ -84,16 +134,40 @@ const renderPlaceShipsBoard = (): void => {
   const appBody = document.querySelector('div#app')
   
   if (appBody !== null) {
+    const modalContainer = document.createElement('div');
+    modalContainer.classList.add('modal');
+
+    const modal = document.createElement('div');
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = "Cancel"
+    cancelBtn.classList.add('cancel-btn');
+    cancelBtn.addEventListener("click", () => {
+      location.reload();
+    })
+    modal.appendChild(cancelBtn);
+
+    const modalHeader = document.createElement('div');
+    modalHeader.classList.add('modal-header');
+
     const instructionsContainer = document.createElement('div');
     instructionsContainer.classList.add('instructions-container');
     instructionsContainer.appendChild(renderInstructions("carrier"));
     
-    appBody.appendChild(instructionsContainer);
+    modalHeader.appendChild(instructionsContainer);
 
     const controlContainer = renderOrientationControl();
     
-    appBody.appendChild(controlContainer);
+    modalHeader.appendChild(controlContainer);
+
+    modal.appendChild(modalHeader);
     
+    const startBtnContainer = document.createElement('div');
+    startBtnContainer.classList.add('start-btn-container');
+    startBtnContainer.classList.add('hidden');
+
+    modal.appendChild(startBtnContainer);
+
     const board = renderBoard();
     board.classList.add('player-board');
     board.classList.add('board-container');
@@ -104,35 +178,54 @@ const renderPlaceShipsBoard = (): void => {
         coordinates = JSON.parse(tile.dataset.coordinates)
         tile.addEventListener("click", () => {
           const shipType = (instructionsContainer.firstChild as HTMLElement).dataset.shipType;
-          EventsObserver.subscribe("shipPlaced", changeInstructions); 
-          EventsObserver.publish("shipPlacementRequest", {data: {
-            shipType,
-            coordinates,
-            orientation: controlContainer.value
-          }})
+          if (shipType !== "null" && shipType !== undefined) {
+            EventsObserver.publish("shipPlacementRequest", {data: {
+              shipType,
+              coordinates,
+              orientation: controlContainer.value
+            }})
+          }
+        })
+        tile.addEventListener("mouseenter", function(this: HTMLElement) {
+          const currentCoordinates = this.dataset.coordinates;
+          const shipType = (instructionsContainer.firstChild as HTMLElement).dataset.shipType;
+          const orientation = controlContainer.value;
+          if (shipType !== undefined && currentCoordinates !== undefined && orientation !== undefined) {
+            const shipCoordinates = generateShipCoordinates(shipType, JSON.parse(currentCoordinates), orientation)
+            const tilesToMark = Array.from(tilesList).filter((currentTile: HTMLElement) => {
+              return shipCoordinates.some(coordinates => JSON.stringify(coordinates) === currentTile.dataset.coordinates)
+            })
+            tilesList.forEach(cell => {
+              if (tilesToMark.includes(cell)) {
+                cell.classList.add('temp-ship')
+              } else {
+                cell.classList.remove('temp-ship')
+              }
+            })
+          }
         })
       }
     })
     
-    appBody.appendChild(board);
+    modal.appendChild(board);
 
-    const startBtnContainer = document.createElement('div');
-    startBtnContainer.classList.add('start-btn-container');
+    modalContainer.appendChild(modal);
 
-    appBody.appendChild(startBtnContainer);
+    appBody.appendChild(modalContainer);
   }
 }
 
 const renderStartButton = ():void => {
   const container = document.querySelector('div.start-btn-container');
-  const instructions = document.querySelector('div.instructions-container');
+  const modalHeader = document.querySelector('div.modal-header');
   if (container !== null) {
     const child = container.firstChild;
     if (child !== null) container.removeChild(child);
-    container.appendChild(startButtonComponent())
+    container.appendChild(startButtonComponent());
+    container.classList.remove('hidden');
   }
-  if (instructions !== null) {
-    instructions.remove();
+  if (modalHeader !== null) {
+    modalHeader.remove();
   }
 }
 
@@ -141,12 +234,25 @@ const renderGame = (): HTMLElement => {
   gameContainer.classList.add('game-container');
 
   const boardContainer = document.createElement('div');
+
+  const playerBoardContainer = document.createElement('div');
+  playerBoardContainer.classList.add('boards')
+  const playerBoardHeading = document.createElement('h2');
+  playerBoardHeading.textContent = "Your board";
+  playerBoardContainer.appendChild(playerBoardHeading)
   const playerBoard = renderBoard();
   playerBoard.dataset.name = "player"
   playerBoard.classList.add('player-board')
   playerBoard.classList.add('board-container');
-  boardContainer.appendChild(playerBoard);
+  playerBoardContainer.appendChild(playerBoard);
 
+  boardContainer.appendChild(playerBoardContainer)
+
+  const computerBoardContainer = document.createElement('div');
+  computerBoardContainer.classList.add('boards')
+  const computerBoardHeading = document.createElement('h2');
+  computerBoardHeading.textContent = "Enemy's board";
+  computerBoardContainer.appendChild(computerBoardHeading)
   const computerBoard = renderBoard();
   computerBoard.dataset.name = "computer";
   computerBoard.classList.add('computer-board');
@@ -159,7 +265,9 @@ const renderGame = (): HTMLElement => {
       EventsObserver.publish("playerAttackRequest", {data: coordinates})
     })
   })
-  boardContainer.appendChild(computerBoard);
+  computerBoardContainer.appendChild(computerBoard);
+
+  boardContainer.appendChild(computerBoardContainer);
 
   gameContainer.appendChild(boardContainer);
   return gameContainer
@@ -222,6 +330,9 @@ const handleTileHit = ({data}: EventPayloadType): void => {
 }
 
 const winnerContainerComponent = (winner: string): HTMLDivElement => {
+  const modal = document.createElement('div');
+  modal.classList.add('modal');
+
   const winnerContainer = document.createElement('div');
   winnerContainer.classList.add('winner-container');
 
@@ -235,7 +346,8 @@ const winnerContainerComponent = (winner: string): HTMLDivElement => {
     location.reload();
   })
   winnerContainer.appendChild(playAgainBtn);
-  return winnerContainer
+  modal.appendChild(winnerContainer)
+  return modal
 }
 
 const showWinner = ({data}: EventPayloadType): void => {
@@ -264,6 +376,7 @@ const markHitShip = ({data}: EventPayloadType): void => {
 
 const domSubscriptions = (): void => {
   EventsObserver.subscribe("initialPageLoad", renderPlaceShipsBoard)
+  EventsObserver.subscribe("shipPlaced", changeInstructions);
   EventsObserver.subscribe("renderStartGame", renderStartButton)
   EventsObserver.subscribe("markShips", markShips);
   EventsObserver.subscribe("tileIsHit", handleTileHit);
