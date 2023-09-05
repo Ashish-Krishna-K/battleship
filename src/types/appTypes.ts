@@ -8,16 +8,16 @@ export interface ShipType {
 export interface CoordinatesType {
   x: number;
   y: number;
-};
+}
 
 export interface ShipMarkersType {
   coordinate: CoordinatesType;
   ship: ShipType;
-};
+}
 
 export interface EventPayloadType {
   data: any;
-};
+}
 
 export type EventHandlerType = (payload: EventPayloadType) => any;
 
